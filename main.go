@@ -14,7 +14,22 @@ func cleanInput(text string) []string {
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+
 	var text string
+
+	commRegistry = map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Display a help message",
+			callback:    commandHelp,
+		},
+	}
+
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
@@ -24,6 +39,12 @@ func main() {
 			continue
 		}
 		firstWord := words[0]
-		fmt.Printf("Your command was: %s\n", firstWord)
+
+		if _, exist := commRegistry[firstWord]; exist {
+			commRegistry[firstWord].callback()
+		} else {
+			fmt.Println("Unknown command")
+		}
+
 	}
 }
