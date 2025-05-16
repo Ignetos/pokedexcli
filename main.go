@@ -17,6 +17,11 @@ func main() {
 
 	var text string
 
+	config := Config{
+		next:     "https://pokeapi.co/api/v2/location-area",
+		previous: "",
+	}
+
 	commRegistry = map[string]cliCommand{
 		"exit": {
 			name:        "exit",
@@ -27,6 +32,16 @@ func main() {
 			name:        "help",
 			description: "Display a help message",
 			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Displays location area",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Display previous location area",
+			callback:    commandMapB,
 		},
 	}
 
@@ -41,7 +56,10 @@ func main() {
 		firstWord := words[0]
 
 		if _, exist := commRegistry[firstWord]; exist {
-			commRegistry[firstWord].callback()
+			err := commRegistry[firstWord].callback(&config)
+			if err != nil {
+				fmt.Println("Unable to execute command")
+			}
 		} else {
 			fmt.Println("Unknown command")
 		}
