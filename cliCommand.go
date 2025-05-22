@@ -17,6 +17,7 @@ type cliCommand struct {
 type Config struct {
 	next     string
 	previous string
+	cache    *internal.Cache
 }
 
 var commRegistry = make(map[string]cliCommand)
@@ -55,7 +56,7 @@ func commandHelp(c *Config) error {
 
 func commandMap(c *Config) error {
 	url := c.next
-	mapData, err := internal.GetMapData(url)
+	mapData, err := internal.GetMapData(url, c.cache)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func commandMapB(c *Config) error {
 		fmt.Println("you're on the first page")
 		return nil
 	}
-	mapData, err := internal.GetMapData(url)
+	mapData, err := internal.GetMapData(url, c.cache)
 	if err != nil {
 		return err
 	}

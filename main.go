@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/Ignetos/pokedexcli/internal"
 )
 
 func cleanInput(text string) []string {
@@ -15,11 +18,14 @@ func cleanInput(text string) []string {
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
+	cache := internal.NewCache(5 * time.Second)
+
 	var text string
 
 	config := Config{
 		next:     "https://pokeapi.co/api/v2/location-area",
 		previous: "",
+		cache:    cache,
 	}
 
 	commRegistry = map[string]cliCommand{

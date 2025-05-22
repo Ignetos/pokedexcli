@@ -1,3 +1,4 @@
 .vscode
 repl_test.go
 repl.log
+internal/cache_test.go
