@@ -58,7 +58,7 @@ func commandMap(c *Config) error {
 	url := c.next
 	mapData, err := internal.GetMapData(url, c.cache)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to get map data: %w", err)
 	}
 
 	c.next = mapData.Next
@@ -77,7 +77,7 @@ func commandMapB(c *Config) error {
 	}
 	mapData, err := internal.GetMapData(url, c.cache)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to get map data: %w", err)
 	}
 
 	c.next = mapData.Next
