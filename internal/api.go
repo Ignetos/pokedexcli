@@ -36,6 +36,7 @@ type ExploreData struct {
 	} `json:"pokemon_encounters"`
 }
 
+// check if the scheme is https or not
 func errIfNotHTTPS(URL string) error {
 	url, err := url.Parse(URL)
 	if err != nil {
@@ -47,24 +48,49 @@ func errIfNotHTTPS(URL string) error {
 	return nil
 }
 
-func UnmarshalMapData(b []byte) (MapData, error) {
-	var data MapData
+// generic function to be used on MapData and ExploreData
+func UnmarshalData[T any](b []byte) (T, error) {
+	var data T
 	err := json.Unmarshal(b, &data)
 	if err != nil {
-		return MapData{}, fmt.Errorf("error decoding response: %w", err)
+		return data, fmt.Errorf("error decoding response: %w", err)
 	}
 	return data, nil
 }
 
-func UnmarshalExploreData(b []byte) (ExploreData, error) {
-	var data ExploreData
-	err := json.Unmarshal(b, &data)
-	if err != nil {
-		return ExploreData{}, fmt.Errorf("error decoding response: %w", err)
+// generic function to be used on MapData and ExploreData
+func GetData[T any](url string, cache *Cache) (T, error) {
+	var data T
+	if err := errIfNotHTTPS(url); err != nil {
+		return data, err
 	}
-	return data, nil
+
+	cachedData, ok := cache.Get(url)
+	if ok {
+		return UnmarshalData[T](cachedData)
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		return data, fmt.Errorf("error getting response: %w", err)
+	}
+	if res.StatusCode > 299 {
+		return data, nil
+	}
+	defer res.Body.Close()
+
+	byteData, err := io.ReadAll(res.Body)
+	if err != nil {
+		return data, fmt.Errorf("error reading response: %w", err)
+	}
+	cache.Add(url, byteData)
+
+	cachedData, _ = cache.Get(url)
+	return UnmarshalData[T](cachedData)
 }
 
+// not in use but kept in case there is an unexpected need for it later
+// will delete later
 func GetMapData(url string, cache *Cache) (MapData, error) {
 	if err := errIfNotHTTPS(url); err != nil {
 		return MapData{}, err
@@ -72,7 +98,7 @@ func GetMapData(url string, cache *Cache) (MapData, error) {
 
 	cachedData, ok := cache.Get(url)
 	if ok {
-		return UnmarshalMapData(cachedData)
+		return UnmarshalData[MapData](cachedData)
 	}
 
 	res, err := http.Get(url)
@@ -88,9 +114,11 @@ func GetMapData(url string, cache *Cache) (MapData, error) {
 	cache.Add(url, byteData)
 
 	cachedData, _ = cache.Get(url)
-	return UnmarshalMapData(cachedData)
+	return UnmarshalData[MapData](cachedData)
 }
 
+// not in use but kept in case there is an unexpected need for it later
+// will delete later
 func GetExploreData(url string, cache *Cache) (ExploreData, error) {
 	if err := errIfNotHTTPS(url); err != nil {
 		return ExploreData{}, err
@@ -98,7 +126,7 @@ func GetExploreData(url string, cache *Cache) (ExploreData, error) {
 
 	cachedData, ok := cache.Get(url)
 	if ok {
-		return UnmarshalExploreData(cachedData)
+		return UnmarshalData[ExploreData](cachedData)
 	}
 
 	res, err := http.Get(url)
@@ -117,5 +145,5 @@ func GetExploreData(url string, cache *Cache) (ExploreData, error) {
 	cache.Add(url, byteData)
 
 	cachedData, _ = cache.Get(url)
-	return UnmarshalExploreData(cachedData)
+	return UnmarshalData[ExploreData](cachedData)
 }

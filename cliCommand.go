@@ -66,7 +66,7 @@ func commandHelp(c *Config) error {
 
 func commandMap(c *Config) error {
 	url := c.next
-	mapData, err := internal.GetMapData(url, c.cache)
+	mapData, err := internal.GetData[internal.MapData](url, c.cache)
 	if err != nil {
 		return fmt.Errorf("unable to get map data: %w", err)
 	}
@@ -85,7 +85,7 @@ func commandMapB(c *Config) error {
 		fmt.Println("you're on the first page")
 		return nil
 	}
-	mapData, err := internal.GetMapData(url, c.cache)
+	mapData, err := internal.GetData[internal.MapData](url, c.cache)
 	if err != nil {
 		return fmt.Errorf("unable to get map data: %w", err)
 	}
@@ -100,7 +100,7 @@ func commandMapB(c *Config) error {
 
 func commandExplore(c *Config) error {
 	url := internal.BASEURL + "location-area/" + c.param
-	exploreData, err := internal.GetExploreData(url, c.cache)
+	exploreData, err := internal.GetData[internal.ExploreData](url, c.cache)
 	if err != nil {
 		return fmt.Errorf("unable to get map data: %w", err)
 	}
