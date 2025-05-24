@@ -17,6 +17,7 @@ type cliCommand struct {
 type Config struct {
 	next     string
 	previous string
+	param    string
 	cache    *internal.Cache
 }
 
@@ -26,6 +27,15 @@ func printMap(md internal.MapData) {
 	data := md.Results
 	for _, area := range data {
 		fmt.Println(area.Name)
+	}
+}
+
+func printExplore(ed internal.ExploreData, area string) {
+	data := ed.PokemonEncounters
+	fmt.Printf("Exploring %s...\n", area)
+	fmt.Println("Found Pokemon:")
+	for _, encounter := range data {
+		fmt.Println(" - " + encounter.Pokemon.Name)
 	}
 }
 
@@ -84,6 +94,22 @@ func commandMapB(c *Config) error {
 	c.previous = mapData.Previous
 
 	printMap(mapData)
+
+	return nil
+}
+
+func commandExplore(c *Config) error {
+	url := internal.BASEURL + "location-area/" + c.param
+	exploreData, err := internal.GetExploreData(url, c.cache)
+	if err != nil {
+		return fmt.Errorf("unable to get map data: %w", err)
+	}
+	if exploreData.Location.Name == "" {
+		fmt.Println("location not found")
+		return nil
+	}
+
+	printExplore(exploreData, c.param)
 
 	return nil
 }

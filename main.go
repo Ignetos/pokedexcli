@@ -25,6 +25,7 @@ func main() {
 	config := Config{
 		next:     "https://pokeapi.co/api/v2/location-area",
 		previous: "",
+		param:    "",
 		cache:    cache,
 	}
 
@@ -49,6 +50,11 @@ func main() {
 			description: "Display previous location area",
 			callback:    commandMapB,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Display pokemon in the area",
+			callback:    commandExplore,
+		},
 	}
 
 	for {
@@ -60,6 +66,9 @@ func main() {
 			continue
 		}
 		firstWord := words[0]
+		if len(words) > 1 {
+			config.param = words[1]
+		}
 
 		if _, exist := commRegistry[firstWord]; exist {
 			err := commRegistry[firstWord].callback(&config)
